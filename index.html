@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Übungs-App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        async function loadQuestions() {
+            const response = await fetch('questions.csv');
+            const csvData = await response.text();
+            const lines = csvData.split('\n');
+            let questions = [];
+            lines.forEach((line, index) => {
+                if (index === 0) return; // Skip header
+                const [question, answer, options] = line.split(';');
+                questions.push({ question, answer, options: options ? options.split(',') : null });
+            });
+            displayQuestions(questions);
+        }
+
+        function displayQuestions(questions) {
+            const container = document.getElementById('questions-container');
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'card';
+                questionDiv.innerHTML = `
+                    <div class="card-content">
+                        <p><strong>Frage ${index + 1}:</strong> ${q.question}</p>
+                        ${q.options ? q.options.map((opt, i) => `<p><label><input type="radio" onclick="showAnswer(${index})" name="q${index}" value="${opt}"><span>${opt}</span></label></p>`).join('') : ''}
+                    </div>
+                    <div class="card-action">
+                        <p id="answer-${index}" style="display:none">${q.answer}</p>
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function showAnswer(index) {
+            const answerElement = document.getElementById(`answer-${index}`);
+            answerElement.style.display = 'block';
+        }
+
+        window.addEventListener('load', loadQuestions);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="center-align">Test Übungs-App</h1>
+        <div id="questions-container"></div>
+    </div>
+</body>
+</html>
